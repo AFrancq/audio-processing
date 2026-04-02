@@ -1,7 +1,7 @@
 use std::{fs::File, path::Path};
 
 fn read_audio_file(file_path: &Path) {
-    println!("");
+    println!("test");
 }
 
 fn main() {
