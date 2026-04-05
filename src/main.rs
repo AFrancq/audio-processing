@@ -1,8 +1,14 @@
 use std::{
     fs::File,
     io::{Error, Read},
-    path::{self, Path},
+    path::Path,
 };
+
+trait AudioFile {
+    fn read_audio_file(path: &Path) -> Result<Self, Error>
+    where
+        Self: Sized;
+}
 
 struct WavHeader {
     riff: [u8; 4],
@@ -20,27 +26,19 @@ struct WavHeader {
     subchunk2_size: u32,
 }
 
-struct WavData {
+struct Wav {
+    header: WavHeader,
     data: Vec<u8>,
 }
 
-struct WavFile {
-    header: WavHeader,
-    data: WavData,
-}
-
-trait AudioFile {
-    fn read_audio_file(path: &Path) -> Result<Self, Error>;
-}
-
-impl AudioFile for WavFile {
+impl AudioFile for Wav {
     fn read_audio_file(path: &Path) -> Result<Self, Error> {
-        let mut file = File::open(path)?;
+        let file = File::open(path)?;
         read_wav_file(file)
     }
 }
 
-fn read_wav_file(mut file: File) -> Result<WavFile, Error> {
+fn read_wav_file(mut file: File) -> Result<Wav, Error> {
     let mut buffer = [0u8; 44];
     file.read_exact(&mut buffer)?;
     let header = WavHeader {
@@ -60,17 +58,7 @@ fn read_wav_file(mut file: File) -> Result<WavFile, Error> {
     };
     let mut data = vec![0u8; header.subchunk2_size as usize];
     file.read_exact(&mut data)?;
-    Ok(WavFile {
-        header,
-        data: WavData { data },
-    })
-}
-
-fn read_audio_file(file_path: &Path) -> Result<Vec<u8>, Error> {
-    // let mut data: Vec<u8> = vec![];
-    // File::open(file_path)?.read_to_end(&mut data)?;
-    // Ok(data)
-    // let mut file = File::open(file_path);
+    Ok(Wav { header, data })
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
