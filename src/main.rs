@@ -34,11 +34,11 @@ struct Wav {
 impl AudioFile for Wav {
     fn read_audio_file(path: &Path) -> Result<Self, Error> {
         let file = File::open(path)?;
-        read_wav_file(file)
+        read_wav(file)
     }
 }
 
-fn read_wav_file(mut file: File) -> Result<Wav, Error> {
+fn read_wav(mut file: File) -> Result<Wav, Error> {
     let mut buffer = [0u8; 44];
     file.read_exact(&mut buffer)?;
     let header = WavHeader {
@@ -63,7 +63,7 @@ fn read_wav_file(mut file: File) -> Result<Wav, Error> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file_path = Path::new("./data/ambient-wind.wav");
-    let data: Vec<u8> = read_audio_file(file_path)?;
+    let wav = Wav::read_audio_file(file_path)?;
     print!("Test");
     Ok(())
 }
